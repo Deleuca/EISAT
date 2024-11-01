@@ -21,7 +21,7 @@ def findVariable(name: str):
     return None
     
 def parseClause(string: str):
-    # Note: Special characters: "V" and "!"> Any other character is considered a variable.
+    # Note: Special characters: "V", "v", and "!"> Any other character is considered a variable.
     literals = []
     sep_list = string.split()
     for i in sep_list:
@@ -48,6 +48,5 @@ def parseClause(string: str):
     new_clause = newClause(literals[0], literals[1], literals[2])
     return new_clause
     
-clause = parseClause(input("Enter a string: "))
-print(clause)
+
                     
