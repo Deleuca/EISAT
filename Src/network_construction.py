@@ -25,7 +25,7 @@ def parseClause(string: str):
     literals = []
     sep_list = string.split()
     for i in sep_list:
-        if i == "V":
+        if i == "V" or i == "v":
             continue
         else:
             if i[0] == "!": # which indicates negation
