@@ -68,7 +68,40 @@ Network Construction Methods
 1. Variable Operations
 '''
 
-def variable_to_node():
+def variables_to_nodes():
     for variable in variables:
         name = variable.getName()
         G.add_node(name)
+
+'''
+2. Clause Operations
+'''
+
+def create_cliques(k = 1):
+    if i == 1:
+        for clause in clauses:
+            literals = clause.getLiterals()
+            
+            G.add_node(str(literals[0]))
+            G.add_node(str(literals[1]))
+            G.add_node(str(literals[2]))
+
+            G.add_edge(str(literals[0]), str(literals[1]))
+            G.add_edge(str(literals[1]), str(literals[2]))
+            G.add_edge(str(literals[0]), str(literals[2]))
+        return    
+    for i in k:
+        for clause in clauses:
+            literals = clause.getLiterals()
+            
+            l0 = str(literals[0]) + "_" + str(i)
+            l1 = str(literals[1]) + "_" + str(i)
+            l2 = str(literals[2]) + "_" + str(i)
+
+            G.add_node(l0)
+            G.add_node(l1)
+            G.add_node(l2)
+
+            G.add_edge(l0, l1)
+            G.add_edge(l1, l2)
+            G.add_edge(l0, l2)
