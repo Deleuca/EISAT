@@ -39,6 +39,7 @@ class Clause:
         :param var3: Third variable in the clause.
         """
         self.literals = [literal_1, literal_2, literal_3]
-    
+    def getLiterals(self):
+        return self.literals
     def __str__(self):
         return f"({self.literals[0]} ∨ {self.literals[1]} ∨ {self.literals[2]})"
