@@ -1,26 +1,37 @@
 import networkx as nx
 from sat_classes import Variable, Literal, Clause
 
+G = nx.Graph()
+
 variables = []
 clauses = []
 
-def newVariable(name: str):
+
+'''
+3-SAT Problem Istantiation Methods
+'''
+
+def new_variable(name: str):
+    for variable in variables:
+        if variable.getName() == name:
+            print("Variable already exists.")
+            return
     new_var = Variable(name)
     variables.append(new_var)
     return new_var
     
-def newClause(literal_1: Literal, literal_2: Literal, literal_3: Literal):
+def new_clause(literal_1: Literal, literal_2: Literal, literal_3: Literal):
     new_clause = Clause(literal_1, literal_2, literal_3)
     clauses.append(new_clause)
     return new_clause
     
-def findVariable(name: str):
+def find_variable(name: str):
     for i in variables:
         if i.getName() == name:
             return i
     return None
     
-def parseClause(string: str):
+def parse_clause(string: str):
     # Note: Special characters: "V", "v", and "!"> Any other character is considered a variable.
     literals = []
     sep_list = string.split()
@@ -49,4 +60,15 @@ def parseClause(string: str):
     return new_clause
     
 
-                    
+'''
+Network Construction Methods
+'''
+
+'''
+1. Variable Operations
+'''
+
+def variable_to_node():
+    for variable in variables:
+        name = variable.getName()
+        G.add_node(name)
