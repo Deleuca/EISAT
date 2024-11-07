@@ -9,7 +9,7 @@ class Variable:
     def getName(self):
         return self.name
     def __str__(self):
-    	return name
+    	return self.name
 
 class Literal:
     def __init__(self, variable: Variable, negated: bool = False):
@@ -24,6 +24,8 @@ class Literal:
     
     def getVariable(self):
     	return self.variable
+    def getName(self):
+    	return self.variable.getName()
     def isNegated(self):
     	return self.negated
     def __str__(self):
@@ -34,9 +36,9 @@ class Clause:
         """
         Represents a 3-variable clause in a SAT formula.
         
-        :param var1: First variable in the clause.
-        :param var2: Second variable in the clause.
-        :param var3: Third variable in the clause.
+        :param literal_1: First literal in the clause.
+        :param literal_2: Second literal in the clause.
+        :param literal_3: Third literal in the clause.
         """
         self.literals = [literal_1, literal_2, literal_3]
     def getLiterals(self):
