@@ -6,6 +6,8 @@ G = nx.Graph()
 variables = []
 clauses = []
 
+nodes = []
+
 
 '''
 3-SAT Problem Istantiation Methods
@@ -71,8 +73,15 @@ Network Construction Methods
 def variables_to_nodes():
     for variable in variables:
         name = variable.getName()
-        G.add_node(name)
+        G.add_node(len(nodes))
+        nodes.append(name)
 
+def literals_to_nodes():
+    for clause in clauses:
+    	for literal in clause.getLiterals():
+    	    name = literal.getName()
+    	    G.add_node(len(nodes))
+    	    nodes.append(name)
 '''
 2. Clause Operations
 '''
