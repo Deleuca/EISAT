@@ -68,7 +68,7 @@ Network Construction Methods
 1. Literal Operations
 '''
 
-def literals_to_nodes():
+def variables_to_nodes():
     for variable in variables:
         name = variable.getName()
         G.add_node(name)
