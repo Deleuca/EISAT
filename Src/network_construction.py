@@ -34,7 +34,7 @@ def find_variable(name: str):
     return None
     
 def parse_clause(string: str):
-    # Note: Special characters: "V", "v", and "!"> Any other character is considered a variable.
+    # Note: Special characters: "V", "v", and "-"> Any other character is considered a variable.
     literals = []
     sep_list = string.split()
     for i in sep_list:
@@ -58,8 +58,8 @@ def parse_clause(string: str):
                	else:
                	    new_literal = Literal(var, False)
                	literals.append(new_literal)
-    new_clause = newClause(literals[0], literals[1], literals[2])
-    return new_clause
+    new_c = new_clause(literals[0], literals[1], literals[2])
+    return new_c
     
 
 '''
@@ -83,13 +83,19 @@ def literals_to_nodes():
     	    G.add_node(len(nodes))
     	    nodes.append(name)
     	    
-def 
+def negated_literals_to_nodes():
+    for clause in clauses:
+    	for literal in clause.getLiterals():
+    	    name = literal.getName()
+    	    G.add_node(len(nodes))
+    	    nodes.append(name)
+    	    
 '''
 2. Clause Operations
 '''
 
 def create_cliques(k = 1):
-    if i == 1:
+    if k == 1:
         for clause in clauses:
             literals = clause.getLiterals()
             
