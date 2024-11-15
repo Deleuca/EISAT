@@ -41,7 +41,7 @@ def parse_clause(string: str):
         if i == "V" or i == "v":
             continue
         else:
-            if i[0] == "!": # which indicates negation
+            if i[0] == "-": # which indicates negation
                 name = i[1:]
                 var = findVariable(name)
                 if var is None:
@@ -82,6 +82,8 @@ def literals_to_nodes():
     	    name = literal.getName()
     	    G.add_node(len(nodes))
     	    nodes.append(name)
+    	    
+def 
 '''
 2. Clause Operations
 '''
