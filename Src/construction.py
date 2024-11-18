@@ -115,4 +115,38 @@ def all_to_all():
             if not same_cluster(node_1, node_2):
                 G.add_edge(node_1, node_2)
 
-def
+def x_to_x():
+    node_list = list(G.nodes)
+    for i in range(len(node_list)):
+        node_1 = node_list[i]
+        for j in range(i + 1, len(node_list)):
+            node_2 = node_list[j]
+            if not same_cluster(node_1, node_2) and node_1.getLiteral() == node_2.getLiteral():
+                G.add_edge(node_1, node_2)
+
+def x_to_not_x():
+    node_list = list(G.nodes)
+    for i in range(len(node_list)):
+        node_1 = node_list[i]
+        for j in range(i + 1, len(node_list)):
+            node_2 = node_list[j]
+            if not same_cluster(node_1, node_2) and node_1.getLiteral() == - node_2.getLiteral():
+                G.add_edge(node_1, node_2)
+
+def x_to_all_but_x():
+    node_list = list(G.nodes)
+    for i in range(len(node_list)):
+        node_1 = node_list[i]
+        for j in range(i + 1, len(node_list)):
+            node_2 = node_list[j]
+            if not same_cluster(node_1, node_2) and node_1.getLiteral() != node_2.getLiteral():
+                G.add_edge(node_1, node_2)
+
+def x_to_all_but_not_x():
+    node_list = list(G.nodes)
+    for i in range(len(node_list)):
+        node_1 = node_list[i]
+        for j in range(i + 1, len(node_list)):
+            node_2 = node_list[j]
+            if not same_cluster(node_1, node_2) and node_1.getLiteral() != - node_2.getLiteral():
+                G.add_edge(node_1, node_2)
