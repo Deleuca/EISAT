@@ -15,5 +15,12 @@ class Node:
         return self.iteration
     def inCluster(self):
         return self.cluster
+
+    def __hash__(self):
+        return hash(self.name)
+
+    def __eq__(self, other):
+        return isinstance(other, Node) and self.name == other.name
+
     def __repr__(self):
         return f"{self.clause}: {self.literal}"
