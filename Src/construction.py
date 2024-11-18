@@ -2,7 +2,7 @@ import networkx as nx
 from pysat.formula import CNF
 import re
 from node import Node
-G = nx.Graph()
+graph = nx.Graph()
 
 history = {"K cliques": 0, "K clusters": 0, "K literals": 0, "K literals and negs": 0, "K Variables": 0}
 
@@ -30,7 +30,7 @@ Network Construction Methods
 1. Clause Operations
 '''
 
-def clause_to_clique(k = 1):
+def clause_to_clique(G: nx.Graph, k = 1):
     for clause_index in range(1, len(cnf.clauses) + 1):
         for i in range(1, k + 1):
             clause_nodes = []
@@ -43,8 +43,9 @@ def clause_to_clique(k = 1):
             G.add_edge(clause_nodes[0], clause_nodes[2])
             G.add_edge(clause_nodes[1], clause_nodes[2])
     history["K cliques"] += k
+    return G
 
-def clause_to_cluster(k = 1):
+def clause_to_cluster(G: nx.Graph, k = 1):
     for clause_index in range(1, len(cnf.clauses) + 1):
         for i in range(1, k + 1):
             for literal_index in range(1, 4):
@@ -52,12 +53,13 @@ def clause_to_cluster(k = 1):
                 new_node = Node(name=name, literal=cnf.clauses[clause_index-1][literal_index-1], clause=cnf.clauses[clause_index-1], iteration=i + history.get("K clusters"), cluster=True)
                 G.add_node(new_node)
     history["K clusters"] += k
+    return G
 
 '''
 2. Literal Operations
 '''
 
-def literal_to_node(k = 1):
+def literal_to_node(G: nx.Graph, k = 1):
     literals = set()
     for clause in cnf.clauses:
         for literal in clause:
@@ -68,8 +70,9 @@ def literal_to_node(k = 1):
             new_node = Node(name=name, literal=literal, clause=None, iteration=i + history.get("K literals"))
             G.add_node(new_node)
     history["K literals"] += k
+    return G
 
-def literal_and_negation_to_node(k = 1):
+def literal_and_negation_to_node(G: nx.Graph, k = 1):
     literals = set()
     for clause in cnf.clauses:
         for literal in clause:
@@ -82,8 +85,9 @@ def literal_and_negation_to_node(k = 1):
             G.add_node(p_node)
             G.add_node(n_node)
     history["K literals and negs"] += k
+    return G
 
-def variable_to_node(k = 1):
+def variable_to_node(G: nx.Graph, k = 1):
     literals = set()
     for clause in cnf.clauses:
         for literal in clause:
@@ -94,6 +98,7 @@ def variable_to_node(k = 1):
             new_node = Node(name=name, literal=literal, clause=None, iteration=i+history.get("K variables"))
             G.add_node(new_node)
     history["K variables"] += k
+    return G
 
 '''
 3. Connection Functions
@@ -106,7 +111,7 @@ def same_cluster(node_1: Node, node_2: Node):
                 return True
     return False
 
-def all_to_all():
+def all_to_all(G: nx.Graph):
     node_list = list(G.nodes)
     for i in range(len(node_list)):
         node_1 = node_list[i]
@@ -114,8 +119,9 @@ def all_to_all():
             node_2 = node_list[j]
             if not same_cluster(node_1, node_2):
                 G.add_edge(node_1, node_2)
+    return G
 
-def x_to_x():
+def x_to_x(G: nx.Graph):
     node_list = list(G.nodes)
     for i in range(len(node_list)):
         node_1 = node_list[i]
@@ -123,8 +129,9 @@ def x_to_x():
             node_2 = node_list[j]
             if not same_cluster(node_1, node_2) and node_1.getLiteral() == node_2.getLiteral():
                 G.add_edge(node_1, node_2)
+    return G
 
-def x_to_not_x():
+def x_to_not_x(G: nx.Graph):
     node_list = list(G.nodes)
     for i in range(len(node_list)):
         node_1 = node_list[i]
@@ -132,8 +139,9 @@ def x_to_not_x():
             node_2 = node_list[j]
             if not same_cluster(node_1, node_2) and node_1.getLiteral() == - node_2.getLiteral():
                 G.add_edge(node_1, node_2)
+    return G
 
-def x_to_all_but_x():
+def x_to_all_but_x(G: nx.Graph):
     node_list = list(G.nodes)
     for i in range(len(node_list)):
         node_1 = node_list[i]
@@ -141,8 +149,9 @@ def x_to_all_but_x():
             node_2 = node_list[j]
             if not same_cluster(node_1, node_2) and node_1.getLiteral() != node_2.getLiteral():
                 G.add_edge(node_1, node_2)
+    return G
 
-def x_to_all_but_not_x():
+def x_to_all_but_not_x(G: nx.Graph):
     node_list = list(G.nodes)
     for i in range(len(node_list)):
         node_1 = node_list[i]
@@ -150,3 +159,4 @@ def x_to_all_but_not_x():
             node_2 = node_list[j]
             if not same_cluster(node_1, node_2) and node_1.getLiteral() != - node_2.getLiteral():
                 G.add_edge(node_1, node_2)
+    return G
