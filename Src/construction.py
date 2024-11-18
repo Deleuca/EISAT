@@ -37,6 +37,13 @@ def add_clause(string):
 Network Construction Methods
 '''
 
+def toggle_directed_graph(G):
+    if G.is_directed():
+        G = nx.Graph()
+    else:
+        G = nx.DiGraph()
+    return G
+
 '''
 1. Clause Operations
 '''
@@ -117,7 +124,15 @@ def same_cluster(node_1: Node, node_2: Node):
                 return True
     return False
 
+'''
+3.1 Undirected Functions
+'''
+
 def all_to_all():
+    if G.is_directed():
+        print("Error: G is a directed graph.")
+        print("Returning.")
+        return
     node_list = list(G.nodes)
     for i in range(len(node_list)):
         node_1 = node_list[i]
@@ -127,6 +142,10 @@ def all_to_all():
                 G.add_edge(node_1, node_2)
 
 def x_to_x():
+    if G.is_directed():
+        print("Error: G is a directed graph.")
+        print("Returning.")
+        return
     node_list = list(G.nodes)
     for i in range(len(node_list)):
         node_1 = node_list[i]
@@ -136,6 +155,10 @@ def x_to_x():
                 G.add_edge(node_1, node_2)
 
 def x_to_not_x():
+    if G.is_directed():
+        print("Error: G is a directed graph.")
+        print("Returning.")
+        return
     node_list = list(G.nodes)
     for i in range(len(node_list)):
         node_1 = node_list[i]
@@ -145,6 +168,10 @@ def x_to_not_x():
                 G.add_edge(node_1, node_2)
 
 def x_to_all_but_x():
+    if G.is_directed():
+        print("Error: G is a directed graph.")
+        print("Returning.")
+        return
     node_list = list(G.nodes)
     for i in range(len(node_list)):
         node_1 = node_list[i]
@@ -154,6 +181,10 @@ def x_to_all_but_x():
                 G.add_edge(node_1, node_2)
 
 def x_to_all_but_not_x():
+    if G.is_directed():
+        print("Error: G is a directed graph.")
+        print("Returning.")
+        return
     node_list = list(G.nodes)
     for i in range(len(node_list)):
         node_1 = node_list[i]
@@ -161,3 +192,8 @@ def x_to_all_but_not_x():
             node_2 = node_list[j]
             if not same_cluster(node_1, node_2) and node_1.getLiteral() != - node_2.getLiteral():
                 G.add_edge(node_1, node_2)
+
+'''
+3.2 Directed Functions
+'''
+
