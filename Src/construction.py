@@ -1,6 +1,7 @@
 import networkx as nx
 from pysat.formula import CNF
 import re
+import random
 from node import Node
 G = nx.Graph()
 
@@ -11,6 +12,16 @@ history = {"K cliques": 0, "K clusters": 0, "K literals": 0, "K literals and neg
 '''
 
 cnf = CNF()
+
+def generate_random_cnf(num_clauses=5, num_variables=3):
+    random_cnf = CNF()
+    for _ in range(num_clauses):
+        random_clause = random.sample(range(1, num_variables + 1), k=3)
+        for i in range(len(random_clause)):
+            if random.random() > 0.5:
+                random_clause[i] = - random_clause[i]
+        random_cnf.append(random_clause)
+    return random_cnf
 
 def add_clause(string):
     pattern = r"-?\d+\s-?\d+\s-?\d+"
