@@ -93,3 +93,22 @@ def variable_to_node(k = 1):
 3. Connection Functions
 '''
 
+def same_cluster(node_1: str, node_2: str):
+    if node_1[-1] == "c" and node_2[-1] == "c":
+        node_1_list = node_1.split()
+        node_2_list = node_2.split()
+        if node_1_list[2] == node_2_list[2]:
+            if node_1_list[0] == node_2_list[0]:
+                return True
+    return False
+
+def all_to_all():
+    node_list = list(G.nodes)
+    for i in range(len(node_list)):
+        node_1 = node_list[i]
+        for j in range(i + 1, len(node_list)):
+            node_2 = node_list[j]
+            if not same_cluster(node_1, node_2):
+                G.add_edge(node_1, node_2)
+
+def 
