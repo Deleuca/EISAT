@@ -4,7 +4,7 @@ import re
 from node import Node
 G = nx.Graph()
 
-history = {"K cliques": 0, "K clusters": 0, "K literals": 0, "K literals and negs": 0, "K Variables"}
+history = {"K cliques": 0, "K clusters": 0, "K literals": 0, "K literals and negs": 0, "K Variables": 0}
 
 '''
 3-SAT Problem Instantiation Methods
