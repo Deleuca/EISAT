@@ -1,10 +1,10 @@
 import networkx as nx
 from pysat.formula import CNF
 import re
-
+from node import Node
 G = nx.Graph()
 
-history = {"K cliques": 0, "K clusters": 0, "K literals": 0}
+history = {"K cliques": 0, "K clusters": 0, "K literals": 0, "K literals and negs": 0, "K Variables"}
 
 '''
 3-SAT Problem Instantiation Methods
@@ -36,8 +36,9 @@ def clause_to_clique(k = 1):
             clause_nodes = []
             for literal_index in range(1, 4):
                 name = str(clause_index) + "." + str(literal_index) + "." + str(i + history.get("K cliques"))
-                G.add_node(name)
-                clause_nodes.append(name)
+                new_node = Node(name=name, literal=cnf.clauses[clause_index-1][literal_index-1], clause=cnf.clauses[clause_index-1], iteration=i + history.get("K cliques"))
+                G.add_node(new_node)
+                clause_nodes.append(new_node)
             G.add_edge(clause_nodes[0], clause_nodes[1])
             G.add_edge(clause_nodes[0], clause_nodes[2])
             G.add_edge(clause_nodes[1], clause_nodes[2])
@@ -48,7 +49,8 @@ def clause_to_cluster(k = 1):
         for i in range(1, k + 1):
             for literal_index in range(1, 4):
                 name = str(clause_index) + "." + str(literal_index) + "." + str(i + history.get("K clusters")) + ".c"
-                G.add_node(name)
+                new_node = Node(name=name, literal=cnf.clauses[clause_index-1][literal_index-1], clause=cnf.clauses[clause_index-1], iteration=i + history.get("K clusters"), cluster=True)
+                G.add_node(new_node)
     history["K clusters"] += k
 
 '''
@@ -62,8 +64,9 @@ def literal_to_node(k = 1):
             literals.add(literal)
     for literal in literals:
         for i in range(1, k + 1):
-            name = str(literal) + "." + str(i + history.get("K literals"))
-            G.add_node(name)
+            name = str(literal) + "." + str(i + history.get("K literals")) + ".l"
+            new_node = Node(name=name, literal=literal, clause=None, iteration=i + history.get("K literals"))
+            G.add_node(new_node)
     history["K literals"] += k
 
 def literal_and_negation_to_node(k = 1):
@@ -74,8 +77,10 @@ def literal_and_negation_to_node(k = 1):
     for literal in literals:
         for i in range(1, k + 1):
             name = str(literal) + "." + str(i + history.get("K literals and negs"))
-            G.add_node(name + ".p")
-            G.add_node(name + ".n")
+            p_node = Node(name=name+".p", literal=literal, clause=None, iteration=i+history.get("K literals and negs"))
+            n_node = Node(name=name+".n", literal=-literal, clause=None, iteration=i+history.get("K literals and negs"))
+            G.add_node(p_node)
+            G.add_node(n_node)
     history["K literals and negs"] += k
 
 def variable_to_node(k = 1):
@@ -85,20 +90,19 @@ def variable_to_node(k = 1):
             literals.add(abs(literal))
     for literal in literals:
         for i in range(1, k + 1):
-            name = str(literal) + "." + str(i + history.get("K variables"))
-            G.add_node(name + ".v")
+            name = str(literal) + "." + str(i + history.get("K variables")) + ".v"
+            new_node = Node(name=name, literal=literal, clause=None, iteration=i+history.get("K variables"))
+            G.add_node(new_node)
     history["K variables"] += k
 
 '''
 3. Connection Functions
 '''
 
-def same_cluster(node_1: str, node_2: str):
-    if node_1[-1] == "c" and node_2[-1] == "c":
-        node_1_list = node_1.split()
-        node_2_list = node_2.split()
-        if node_1_list[2] == node_2_list[2]:
-            if node_1_list[0] == node_2_list[0]:
+def same_cluster(node_1: Node, node_2: Node):
+    if node_1.inCluster() and node_2.inCluster():
+        if node_1.getClause() == node_2.getClause():
+            if node_1.getIteration() == node_2.getIteration():
                 return True
     return False
 
@@ -111,4 +115,4 @@ def all_to_all():
             if not same_cluster(node_1, node_2):
                 G.add_edge(node_1, node_2)
 
-def 
+def
