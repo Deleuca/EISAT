@@ -13,7 +13,7 @@ class Node:
         return self.clause
     def getIteration(self):
         return self.iteration
-    def getCluster(self):
+    def inCluster(self):
         return self.cluster
     def __repr__(self):
         return f"{self.clause}: {self.literal}"
