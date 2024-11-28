@@ -197,3 +197,67 @@ def x_to_all_but_not_x():
 3.2 Directed Functions
 '''
 
+def dir_all_to_all():
+    if not G.is_directed():
+        print("Error: G is an undirected graph.")
+        print("Returning.")
+        return
+    node_list = list(G.nodes)
+    for i in range(len(node_list)):
+        node_1 = node_list[i]
+        for j in range(len(node_list)):
+            node_2 = node_list[j]
+            if not same_cluster(node_1, node_2):
+                G.add_edge(node_1, node_2)
+
+def dir_x_to_x():
+    if not G.is_directed():
+        print("Error: G is an undirected graph.")
+        print("Returning.")
+        return
+    node_list = list(G.nodes)
+    for i in range(len(node_list)):
+        node_1 = node_list[i]
+        for j in range(len(node_list)):
+            node_2 = node_list[j]
+            if not same_cluster(node_1, node_2) and node_1.getLiteral() == node_2.getLiteral():
+                G.add_edge(node_1, node_2)
+
+def dir_x_to_not_x():
+    if not G.is_directed():
+        print("Error: G is an undirected graph.")
+        print("Returning.")
+        return
+    node_list = list(G.nodes)
+    for i in range(len(node_list)):
+        node_1 = node_list[i]
+        for j in range(len(node_list)):
+            node_2 = node_list[j]
+            if not same_cluster(node_1, node_2) and node_1.getLiteral() == - node_2.getLiteral():
+                G.add_edge(node_1, node_2)
+
+def dir_x_to_all_but_x():
+    if not G.is_directed():
+        print("Error: G is an undirected graph.")
+        print("Returning.")
+        return
+    node_list = list(G.nodes)
+    for i in range(len(node_list)):
+        node_1 = node_list[i]
+        for j in range(len(node_list)):
+            node_2 = node_list[j]
+            if not same_cluster(node_1, node_2) and node_1.getLiteral() != node_2.getLiteral():
+                G.add_edge(node_1, node_2)
+
+def dir_x_to_all_but_not_x():
+    if not G.is_directed():
+        print("Error: G is an undirected graph.")
+        print("Returning.")
+        return
+    node_list = list(G.nodes)
+    for i in range(len(node_list)):
+        node_1 = node_list[i]
+        for j in range(len(node_list)):
+            node_2 = node_list[j]
+            if not same_cluster(node_1, node_2) and node_1.getLiteral() != - node_2.getLiteral():
+                G.add_edge(node_1, node_2)
