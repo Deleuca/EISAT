@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 from fontTools.merge import layoutPreMerge
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from pysat.formula import CNF
-from src.construction import SATGraph
+from construction import SATGraph
 import qdarktheme
 
 G = SATGraph()
