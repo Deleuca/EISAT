@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Force Graph Visualization</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <h1>Networkx Graph Visualized with D3.js</h1>
+  <script>
+    // Load the graph data from the JSON file
+    d3.json('graph_data.json').then(function(graph) {
+
+      // Use the Force Graph function you provided
+      const width = 800, height = 600;
+      
+      function ForceGraph({
+        nodes, 
+        links,
+        nodeId = d => d.id,
+        nodeFill = "currentColor",
+        nodeStroke = "#fff",
+        nodeStrokeWidth = 1.5,
+        nodeRadius = 5,
+        linkStroke = "#999",
+        linkStrokeWidth = 1.5,
+        linkStrength,
+        colors = d3.schemeTableau10,
+        width = 640,
+        height = 400,
+        invalidation
+      } = {}) {
+        const N = d3.map(nodes, nodeId).map(intern);
+        const LS = d3.map(links, linkSource).map(intern);
+        const LT = d3.map(links, linkTarget).map(intern);
+
+        nodes = d3.map(nodes, (_, i) => ({id: N[i]}));
+        links = d3.map(links, (_, i) => ({source: LS[i], target: LT[i]}));
+
+        const color = nodeFill === "currentColor" ? null : d3.scaleOrdinal(colors);
+
+        const forceNode = d3.forceManyBody();
+        const forceLink = d3.forceLink(links).id(({index: i}) => N[i]);
+
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", forceLink)
+            .force("charge", forceNode)
+            .force("center",  d3.forceCenter())
+            .on("tick", ticked);
+
+        const svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [-width / 2, -height / 2, width, height])
+            .attr("style", "max-width: 100%; height: auto; height: intrinsic;");
+
+        const link = svg.append("g")
+            .attr("stroke", linkStroke)
+            .attr("stroke-width", linkStrokeWidth)
+            .selectAll("line")
+            .data(links)
+            .join("line");
+
+        const node = svg.append("g")
+            .attr("fill", nodeFill)
+            .attr("stroke", nodeStroke)
+            .attr("stroke-width", nodeStrokeWidth)
+            .selectAll("circle")
+            .data(nodes)
+            .join("circle")
+            .attr("r", nodeRadius)
+            .call(drag(simulation));
+
+        if (color) node.attr("fill", ({index: i}) => color(N[i]));
+
+        function ticked() {
+          link
+            .attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
+
+          node
+            .attr("cx", d => d.x)
+            .attr("cy", d => d.y);
+        }
+
+        function drag(simulation) {
+          function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+          }
+
+          function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+          }
+
+          function dragended(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+          }
+
+          return d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
+        }
+
+        document.body.appendChild(svg.node());
+      }
+
+      // Call ForceGraph with the loaded graph data
+      ForceGraph({
+        nodes: graph.nodes,
+        links: graph.links,
+        width: 800,
+        height: 600
+      });
+
+    });
+
+    function intern(value) {
+      return value !== null && typeof value === "object" ? value.valueOf() : value;
+    }
+  </script>
+</body>
+</html>
+
