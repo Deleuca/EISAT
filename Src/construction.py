@@ -61,9 +61,9 @@ class SATGraph:
             self.G = nx.DiGraph()
             
     def write(self):
-        G = self.getGraph()
-        nodes = [{"id": node} for node in G.nodes()]
-        links = [{"source": u, "target": v} for u, v in G.edges()]
+        g = self.getGraph()
+        nodes = [{"id": node} for node in g.nodes()]
+        links = [{"source": u, "target": v} for u, v in g.edges()]
         graph_data = {"nodes": nodes,"links": links}
         with open("graph.json", "w") as f:
            json.dump(graph_data, f, indent=4)
