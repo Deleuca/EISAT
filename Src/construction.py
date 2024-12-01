@@ -56,7 +56,14 @@ class SATGraph:
             self.G = nx.Graph()
         else:
             self.G = nx.DiGraph()
-
+            
+    def write(self):
+        nodes = [{"id": node} for node in G.nodes()]
+	links = [{"source": u, "target": v} for u, v in G.edges()]
+	graph_data = {"nodes": nodes,"links": links}
+	with open("graph.json", "w") as f:
+	    json.dump(graph_data, f, indent=4)
+	    
     '''
     1. Clause Operations
     '''
@@ -246,7 +253,7 @@ class SATGraph:
                 node_2 = node_list[j]
                 if not self.same_cluster(node_1, node_2) and node_1.getLiteral() != -node_2.getLiteral():
                     self.G.add_edge(node_1, node_2)
-
+                    
     ''' Plotting Methods '''
 
     def plot_graph(self):
