@@ -28,6 +28,8 @@ class SATGraph:
 
     def getGraph(self):
         return self.G
+    def getCNF(self):
+        return self.cnf
 
     '''
     3-SAT Problem Instantiation Methods
@@ -62,7 +64,14 @@ class SATGraph:
             
     def write(self):
         g = self.getGraph()
-        nodes = [{"id": node.getName(), "group": node.getClause()} for node in g.nodes()]
+        cnf = self.getCNF()
+        nodes = []
+        for node in g.nodes():
+            id = node.getName()
+            info = id.split(".")
+            clause = int(info[0]) - 1
+            literal = cnf.clauses[clause][int(info[1])-1]
+            nodes.append({"id": id, "group": clause, "literal": literal})
         links = [{"source": u.getName(), "target": v.getName(), "value": 1} for u, v in g.edges()]
         graph_data = {"nodes": nodes,"links": links}
         with open("Data/graph.json", "w") as f:
