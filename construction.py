@@ -11,6 +11,7 @@ from pyvis.network import Network
 from node import Node
 import re
 
+
 class SATGraph:
     def __init__(self, cnf=None):
         self.G = nx.Graph()
@@ -25,6 +26,12 @@ class SATGraph:
             self.cnf = CNF()
         else:
             self.cnf = cnf
+
+    def getGraph(self):
+        return self.G
+
+    def getCNF(self):
+        return self.cnf
 
     '''
     3-SAT Problem Instantiation Methods
@@ -57,6 +64,24 @@ class SATGraph:
         else:
             self.G = nx.DiGraph()
 
+    def write(self):
+        g = self.getGraph()
+        cnf = self.getCNF()
+        nodes = []
+        for node in g.nodes():
+            id = node.getName()
+            info = id.split(".")
+            clause = int(info[0]) - 1
+            if info[-1] in ["v", "p", "n", "l"]:
+                literal = info[1]
+            else:
+                literal = cnf.clauses[clause][int(info[1]) - 1]
+            nodes.append({"id": id, "group": clause, "literal": literal})
+        links = [{"source": u.getName(), "target": v.getName(), "value": 1} for u, v in g.edges()]
+        graph_data = {"nodes": nodes, "links": links}
+        with open("../Data/graph.json", "w") as f:
+            json.dump(graph_data, f, indent=4)
+
     '''
     1. Clause Operations
     '''
@@ -66,7 +91,7 @@ class SATGraph:
             for i in range(1, k + 1):
                 clause_nodes = []
                 for literal_index in range(1, 4):
-                    name = f"{clause_index}.{literal_index}.{i + self.history['K cliques']}"
+                    name = f"{clause_index}.{literal_index}.{i + self.history['K cliques']}.k"
                     new_node = Node(
                         name=name,
                         literal=self.cnf.clauses[clause_index - 1][literal_index - 1],
@@ -106,7 +131,7 @@ class SATGraph:
                 literals.add(literal)
         for literal in literals:
             for i in range(1, k + 1):
-                name = f"{literal}.{i + self.history['K literals']}.l"
+                name = f"-1.{literal}.{i + self.history['K literals']}.l"
                 new_node = Node(name=name, literal=literal, clause=None, iteration=i + self.history["K literals"])
                 self.G.add_node(new_node)
         self.history["K literals"] += k
@@ -115,14 +140,22 @@ class SATGraph:
         literals = set()
         for clause in self.cnf.clauses:
             for literal in clause:
-                literals.add(abs(literal))
+                literals.add(abs(literal))  # Track absolute value of literals to handle positive and negative versions
+
         for literal in literals:
             for i in range(1, k + 1):
-                name = f"{literal}.{i + self.history['K literals and negs']}"
-                p_node = Node(name=name + ".p", literal=literal, clause=None, iteration=i + self.history["K literals and negs"])
-                n_node = Node(name=name + ".n", literal=-literal, clause=None, iteration=i + self.history["K literals and negs"])
+                # Create nodes for both the positive and negative literals
+                p_name = f"-1.{literal}.{i + self.history['K literals and negs']}.p"
+                n_name = f"-1.{-literal}.{i + self.history['K literals and negs']}.n"
+
+                p_node = Node(name=p_name, literal=literal, clause=None,
+                              iteration=i + self.history["K literals and negs"])
+                n_node = Node(name=n_name, literal=-literal, clause=None,
+                              iteration=i + self.history["K literals and negs"])
+
                 self.G.add_node(p_node)
                 self.G.add_node(n_node)
+
         self.history["K literals and negs"] += k
 
     def variable_to_node(self, k=1):
@@ -132,7 +165,7 @@ class SATGraph:
                 literals.add(abs(literal))
         for literal in literals:
             for i in range(1, k + 1):
-                name = f"{literal}.{i + self.history['K Variables']}.v"
+                name = f"-1.{literal}.{i + self.history['K Variables']}.v"
                 new_node = Node(name=name, literal=literal, clause=None, iteration=i + self.history["K Variables"])
                 self.G.add_node(new_node)
         self.history["K Variables"] += k
@@ -247,12 +280,23 @@ class SATGraph:
                 if not self.same_cluster(node_1, node_2) and node_1.getLiteral() != -node_2.getLiteral():
                     self.G.add_edge(node_1, node_2)
 
-    ''' Plottiing Methods '''
+    ''' Plotting Methods '''
 
     def plot_graph(self):
-        nx.kamada_kawai_layout(self.G)
-        nx.draw(self.G, with_labels=True, font_weight='bold', node_size=1800, node_color='lightgreen', font_size=10)
-        plt.show()
+        pos = nx.kamada_kawai_layout(self.G)
+        fig = plt.figure(figsize=(12, 12))  # Create a new figure
+        ax = fig.add_subplot(1, 1, 1)  # Add a subplot to the figure
+        nx.draw(
+            self.G,
+            pos,
+            with_labels=True,
+            font_weight='bold',
+            node_size=1800,
+            node_color='lightgreen',
+            font_size=10,
+            ax=ax  # Pass the Axes instance to the drawing function
+        )
+        return fig  # Return the Figure object
 
     def to_d3_json(self):
         """
@@ -265,11 +309,12 @@ class SATGraph:
             d3_json["nodes"].append({
                 "id": i,
                 "name": node.name,
+                "strname": str(node),
                 "literal": node.literal,
                 "clause": node.clause,
                 "iteration": node.iteration,
                 "cluster": node.cluster,
-                "group": node.iteration,
+                "group": node.name.split(".")[0],
             })
             node_mapping[node] = i
 
@@ -282,14 +327,18 @@ class SATGraph:
 
         return d3_json
 
-    def save_d3_visualization(self, output_dir="d3_visualization"):
+    def save_d3_visualization(self, output_dir="graph"):
         """
         Saves the graph in a JSON format compatible with D3.js and generates an HTML file
         to visualize the graph.
         :param output_dir: Directory where the JSON and HTML files will be saved.
         """
+        # Resolve the output directory to an absolute path
+        output_dir = os.path.abspath(output_dir)
+
         # Ensure the output directory exists
-        os.makedirs(output_dir, exist_ok=True)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
         # Convert the graph to D3-compatible JSON
         d3_json = self.to_d3_json()
@@ -297,10 +346,16 @@ class SATGraph:
         with open(json_path, "w") as f:
             json.dump(d3_json, f, indent=4)
 
-        # Generate HTML file for visualization
-        html_content = open("graph.html").read()
-        html_path = os.path.join(output_dir, "index.html")
-        with open(html_path, "w") as f:
-            f.write(html_content)
+        # Copy the template `graph.html` to `index.html` in the correct directory
+        template_path = os.path.abspath("graph/graph/graph.html")
+        if not os.path.exists(template_path):
+            raise FileNotFoundError(f"Template HTML file not found: {template_path}")
+
+        # Save `index.html` in the specified output directory
+        destination_html_path = os.path.join(output_dir, "index.html")
+        with open(template_path, "r") as template_file:
+            html_content = template_file.read()
+        with open(destination_html_path, "w") as output_file:
+            output_file.write(html_content)
 
         print(f"D3 visualization files saved in {output_dir}.")

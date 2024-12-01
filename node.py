@@ -24,6 +24,7 @@ class Node:
     def to_dict(self):
         return {
             "name": self.name,
+            "strname": str(self),
             "literal": self.literal,
             "clause": self.clause,
             "iteration": self.iteration,
