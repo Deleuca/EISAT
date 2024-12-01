@@ -70,7 +70,10 @@ class SATGraph:
             id = node.getName()
             info = id.split(".")
             clause = int(info[0]) - 1
-            literal = cnf.clauses[clause][int(info[1])-1]
+            if info[-1] in ["v", "p", "n", "l"]:
+                literal = info[1]
+            else:
+                literal = cnf.clauses[clause][int(info[1]) - 1]
             nodes.append({"id": id, "group": clause, "literal": literal})
         links = [{"source": u.getName(), "target": v.getName(), "value": 1} for u, v in g.edges()]
         graph_data = {"nodes": nodes,"links": links}
@@ -86,7 +89,7 @@ class SATGraph:
             for i in range(1, k + 1):
                 clause_nodes = []
                 for literal_index in range(1, 4):
-                    name = f"{clause_index}.{literal_index}.{i + self.history['K cliques']}"
+                    name = f"{clause_index}.{literal_index}.{i + self.history['K cliques']}.k"
                     new_node = Node(
                         name=name,
                         literal=self.cnf.clauses[clause_index - 1][literal_index - 1],
@@ -126,7 +129,7 @@ class SATGraph:
                 literals.add(literal)
         for literal in literals:
             for i in range(1, k + 1):
-                name = f"{literal}.{i + self.history['K literals']}.l"
+                name = f"-1.{literal}.{i + self.history['K literals']}.l"
                 new_node = Node(name=name, literal=literal, clause=None, iteration=i + self.history["K literals"])
                 self.G.add_node(new_node)
         self.history["K literals"] += k
@@ -138,7 +141,7 @@ class SATGraph:
                 literals.add(abs(literal))
         for literal in literals:
             for i in range(1, k + 1):
-                name = f"{literal}.{i + self.history['K literals and negs']}"
+                name = f"-1.{literal}.{i + self.history['K literals and negs']}"
                 p_node = Node(name=name + ".p", literal=literal, clause=None, iteration=i + self.history["K literals and negs"])
                 n_node = Node(name=name + ".n", literal=-literal, clause=None, iteration=i + self.history["K literals and negs"])
                 self.G.add_node(p_node)
@@ -152,7 +155,7 @@ class SATGraph:
                 literals.add(abs(literal))
         for literal in literals:
             for i in range(1, k + 1):
-                name = f"{literal}.{i + self.history['K Variables']}.v"
+                name = f"-1.{literal}.{i + self.history['K Variables']}.v"
                 new_node = Node(name=name, literal=literal, clause=None, iteration=i + self.history["K Variables"])
                 self.G.add_node(new_node)
         self.history["K Variables"] += k
