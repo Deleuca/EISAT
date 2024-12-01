@@ -62,10 +62,10 @@ class SATGraph:
             
     def write(self):
         g = self.getGraph()
-        nodes = [{"id": node.getName()} for node in g.nodes()]
-        links = [{"source": u.getName(), "target": v.getName()} for u, v in g.edges()]
+        nodes = [{"id": node.getName(), "group": node.getClause()} for node in g.nodes()]
+        links = [{"source": u.getName(), "target": v.getName(), "value": 1} for u, v in g.edges()]
         graph_data = {"nodes": nodes,"links": links}
-        with open("graph.json", "w") as f:
+        with open("Data/graph.json", "w") as f:
            json.dump(graph_data, f, indent=4)
 
     '''
