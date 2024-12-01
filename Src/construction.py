@@ -26,6 +26,9 @@ class SATGraph:
         else:
             self.cnf = cnf
 
+    def getGraph(self):
+        return self.G
+
     '''
     3-SAT Problem Instantiation Methods
     '''
@@ -58,12 +61,13 @@ class SATGraph:
             self.G = nx.DiGraph()
             
     def write(self):
+        G = self.getGraph()
         nodes = [{"id": node} for node in G.nodes()]
-	links = [{"source": u, "target": v} for u, v in G.edges()]
-	graph_data = {"nodes": nodes,"links": links}
-	with open("graph.json", "w") as f:
-	    json.dump(graph_data, f, indent=4)
-	    
+        links = [{"source": u, "target": v} for u, v in G.edges()]
+        graph_data = {"nodes": nodes,"links": links}
+        with open("graph.json", "w") as f:
+           json.dump(graph_data, f, indent=4)
+
     '''
     1. Clause Operations
     '''
