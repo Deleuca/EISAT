@@ -45,7 +45,9 @@ d3.json("graph.json").then(function(data) {
     // Add a circle for each node
     nodeGroup.append("circle")
         .attr("r", 18) // Node size
-        .attr("fill", d => color(d.group));
+        .attr("fill", d => color(d.group))
+        .on("mouseover", highlightEdges) // Highlight edges on hover
+        .on("mouseout", resetEdges); // Reset edges when mouse leaves
 
     // Create labels for the nodes
     nodeGroup.append("text")
@@ -88,6 +90,26 @@ d3.json("graph.json").then(function(data) {
         nodeGroup
             .attr("transform", d => `translate(${d.x},${d.y})`); // Update both circle and text position
     }
+
+    // Highlight edges when hovering over a node
+    function highlightEdges(event, d) {
+        link
+            .attr("stroke", link => (link.source.id === d.id || link.target.id === d.id) ? "#ff0000" : "#999")
+            .attr("stroke-opacity", link => (link.source.id === d.id || link.target.id === d.id) ? 0.8 : 0.2); // Adjust opacity
+    }
+
+    function resetEdges() {
+        link
+            .attr("stroke", "#999")
+            .attr("stroke-opacity", 0.6);
+    }
+
+    // Add hover behavior to text elements
+    nodeGroup.selectAll("text")
+        .on("mouseover", highlightEdges)
+        .on("mouseout", resetEdges);
+
+    
 
     // Reheat the simulation when drag starts, and fix the subject position.
     function dragstarted(event) {
