@@ -8,12 +8,33 @@ d3.json("graph.json").then(function (data) {
         "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7"
     ]);
 
+    // Track selected nodes
     const selectedNodes = new Set();
+    const groupForceStrength = 0.1; // Adjust strength as needed
+    const clusterForce = alpha => {
+        for (const node of data.nodes) {
+            const group = node.group;
+            const clusterCenter = groupCenters[group] || { x: width / 2, y: height / 2 }; // Fallback to center
+            // Move node slightly toward its cluster center
+            node.vx -= (node.x - clusterCenter.x) * groupForceStrength * alpha;
+            node.vy -= (node.y - clusterCenter.y) * groupForceStrength * alpha;
+        }
+    };
 
+    const groupCenters = {
+        0: { x: width * 0.2, y: height * 0.3 },
+        1: { x: width * 0.3, y: height * 0.5 },
+        2: { x: width * 0.7, y: height * 0.3 },
+        3: { x: width * 0.5, y: height * 0.7 },
+        4: { x: width * 0.8, y: height * 0.5 },
+        "-2": { x: width * 0.5, y: height * 0.9 },
+    };
+    // Create a simulation with several forces.
     const simulation = d3.forceSimulation(data.nodes)
         .force("link", d3.forceLink(data.links).id(d => d.id).distance(200))
         .force("charge", d3.forceManyBody().strength(-30))
         .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("cluster", alpha => clusterForce(alpha))
         .on("tick", ticked);
 
     const svg = d3.create("svg")
