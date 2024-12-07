@@ -43,13 +43,29 @@ d3.json("graph.json").then(function (data) {
         .attr("viewBox", [0, 0, width, height])
         .attr("style", "max-width: 100%; height: auto;");
 
+    svg.append("defs").selectAll("marker")
+    .data(["arrow"])
+    .enter().append("marker")
+    .attr("id", d => d)
+    .attr("viewBox", "0 -5 10 10")
+    .attr("refX", 15) // Adjust for arrow positioning
+    .attr("refY", 0)
+    .attr("markerWidth", 6)
+    .attr("markerHeight", 6)
+    .attr("orient", "auto")
+    .append("path")
+    .attr("d", "M0,-5L10,0L0,5")
+    .attr("fill", "#999");
+
+
     const link = svg.append("g")
         .attr("stroke", "#999")
         .attr("stroke-opacity", 0.6)
         .selectAll()
         .data(data.links)
         .join("line")
-        .attr("stroke-width", d => Math.sqrt(d.value));
+        .attr("stroke-width", d => Math.sqrt(d.value))
+        .attr("marker-end", "url(#arrow)"); // Add arrowhead
 
     const nodeGroup = svg.append("g")
         .selectAll()
@@ -109,12 +125,12 @@ d3.json("graph.json").then(function (data) {
             if (selectedNodes.has(link.source.id) || selectedNodes.has(link.target.id)) {
                 return "#ff0000"; // Keep selected edges red
             }
-            return (link.source.id === d.id || link.target.id === d.id) ? "#ffb3b3" : "#999"; // Highlight hovered edges blue
+            return (link.source.id === d.id) ? "#ffb3b3" : "#999"; // Highlight outgoing edges
         }).attr("stroke-opacity", link => {
             if (selectedNodes.has(link.source.id) || selectedNodes.has(link.target.id)) {
                 return 0.8; // Keep selected edges at higher opacity
             }
-            return (link.source.id === d.id || link.target.id === d.id) ? 0.8 : 0.2; // Adjust opacity for hovered edges
+            return (link.source.id === d.id) ? 0.8 : 0.2; // Adjust opacity for hovered edges
         });
     }
 
