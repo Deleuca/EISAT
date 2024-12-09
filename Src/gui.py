@@ -77,10 +77,11 @@ class SATGen(QWidget):
 
 
 class Constructor(QWidget):
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
         main_layout = QVBoxLayout(self)
         op_layout = QHBoxLayout()
+        self.parent = parent
 
         # Operation selection
         self.op = QComboBox()
@@ -126,6 +127,7 @@ class Constructor(QWidget):
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to apply operation '{op}': {e}")
         G.write()
+        self.parent.graph_viewer.reload_webview()
 
     def show_context_menu(self, position):
         menu = QMenu()
@@ -209,7 +211,7 @@ class MainWindow(QMainWindow):
         left_layout.addWidget(self.sat_gen)
 
         # Constructor below SAT Generator
-        self.constructor = Constructor()
+        self.constructor = Constructor(self)
         left_layout.addWidget(self.constructor)
 
         # Add left layout to main layout
