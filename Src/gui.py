@@ -188,25 +188,40 @@ class GraphViewer(QWidget):
         self.webview.reload()
 
 
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.tab_widget = QTabWidget()
-        self.setCentralWidget(self.tab_widget)
 
+        # Create the main widget
+        main_widget = QWidget()
+        self.setCentralWidget(main_widget)
+
+        # Main horizontal layout
+        main_layout = QHBoxLayout(main_widget)
+
+        # Left vertical layout for SAT Generator and Constructor
+        left_layout = QVBoxLayout()
+
+        # SAT Generator at the top
         self.sat_gen = SATGen()
+        left_layout.addWidget(self.sat_gen)
+
+        # Constructor below SAT Generator
         self.constructor = Constructor()
+        left_layout.addWidget(self.constructor)
+
+        # Add left layout to main layout
+        main_layout.addLayout(left_layout, stretch=1)
+
+        # Graph Viewer on the right
         self.graph_viewer = GraphViewer()
+        main_layout.addWidget(self.graph_viewer, stretch=2)
 
-        self.tab_widget.addTab(self.sat_gen, "SAT Generator")
-        self.tab_widget.addTab(self.constructor, "Constructor")
-        self.tab_widget.addTab(self.graph_viewer, "Graph Viewer")
-
-        self.tab_widget.currentChanged.connect(self.on_tab_changed)
-
-    def on_tab_changed(self, index):
-        if self.tab_widget.widget(index) == self.graph_viewer:
-            self.graph_viewer.reload_webview()
+        # Set up the window properties
+        self.setWindowTitle("SAT Generator")
+        self.resize(1200, 800)
 
     def closeEvent(self, event):
         graph_json_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Data', 'graph.json'))
@@ -219,7 +234,5 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     qdarktheme.setup_theme()
     window = MainWindow()
-    window.setWindowTitle("SAT Generator")
-    window.resize(1200, 800)
     window.show()
     sys.exit(app.exec_())
