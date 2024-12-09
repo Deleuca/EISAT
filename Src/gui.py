@@ -222,7 +222,7 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.graph_viewer, stretch=2)
 
         # Set up the window properties
-        self.setWindowTitle("SAT Generator")
+        self.setWindowTitle("EISAT")
         self.resize(1200, 800)
 
     def closeEvent(self, event):
