@@ -103,6 +103,11 @@ class SATGraph:
                 self.G.add_edge(clause_nodes[0], clause_nodes[1])
                 self.G.add_edge(clause_nodes[0], clause_nodes[2])
                 self.G.add_edge(clause_nodes[1], clause_nodes[2])
+                if self.G.is_directed():
+                    self.G.add_edge(clause_nodes[1], clause_nodes[0])
+                    self.G.add_edge(clause_nodes[2], clause_nodes[0])
+                    self.G.add_edge(clause_nodes[2], clause_nodes[1])
+
         self.history["K cliques"] += k
 
     def clause_to_cluster(self, k=1):
