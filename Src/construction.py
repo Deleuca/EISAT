@@ -5,7 +5,8 @@ import networkx as nx
 from matplotlib import pyplot as plt
 from pysat.formula import CNF
 import random
-
+import numpy as np
+import seaborn as sns
 from pyvis.network import Network
 
 from node import Node
