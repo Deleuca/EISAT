@@ -198,7 +198,8 @@ class SATGraph:
             for j in range(i + 1, len(node_list)):
                 node_2 = node_list[j]
                 if not self.same_cluster(node_1, node_2):
-                    self.G.add_edge(node_1, node_2)
+                    if not node_1.getLiteral is None and not node_2.getLiteral() is None:
+                        self.G.add_edge(node_1, node_2)
 
     def x_to_x(self):
         node_list = list(self.G.nodes)
@@ -207,7 +208,8 @@ class SATGraph:
             for j in range(i + 1, len(node_list)):
                 node_2 = node_list[j]
                 if not self.same_cluster(node_1, node_2) and node_1.getLiteral() == node_2.getLiteral():
-                    self.G.add_edge(node_1, node_2)
+                    if not node_1.getLiteral() is None:
+                        self.G.add_edge(node_1, node_2)
 
     def x_to_not_x(self):
         node_list = list(self.G.nodes)
@@ -216,7 +218,8 @@ class SATGraph:
             for j in range(i + 1, len(node_list)):
                 node_2 = node_list[j]
                 if not self.same_cluster(node_1, node_2) and node_1.getLiteral() == -node_2.getLiteral():
-                    self.G.add_edge(node_1, node_2)
+                    if not node_1.getLiteral() is None and not node_2.getLiteral() is None:
+                        self.G.add_edge(node_1, node_2)
 
     def x_to_all_but_x(self):
         node_list = list(self.G.nodes)
@@ -225,7 +228,8 @@ class SATGraph:
             for j in range(i + 1, len(node_list)):
                 node_2 = node_list[j]
                 if not self.same_cluster(node_1, node_2) and node_1.getLiteral() != node_2.getLiteral():
-                    self.G.add_edge(node_1, node_2)
+                    if not node_1.getLiteral() is None and not node_2.getLiteral is None:
+                        self.G.add_edge(node_1, node_2)
 
     def x_to_all_but_not_x(self):
         node_list = list(self.G.nodes)
@@ -234,7 +238,8 @@ class SATGraph:
             for j in range(i + 1, len(node_list)):
                 node_2 = node_list[j]
                 if not self.same_cluster(node_1, node_2) and node_1.getLiteral() != -node_2.getLiteral():
-                    self.G.add_edge(node_1, node_2)
+                    if not node_1.getLiteral() is None and not node_2.getLiteral is None:
+                        self.G.add_edge(node_1, node_2)
 
     '''
     3.2 Directed Functions
@@ -247,7 +252,8 @@ class SATGraph:
             for j in range(len(node_list)):
                 node_2 = node_list[j]
                 if not self.same_cluster(node_1, node_2):
-                    self.G.add_edge(node_1, node_2)
+                    if not node_1.getLiteral() is None and not node_2.getLiteral is None:
+                        self.G.add_edge(node_1, node_2)
 
     def dir_x_to_x(self):
         node_list = list(self.G.nodes)
@@ -256,7 +262,8 @@ class SATGraph:
             for j in range(len(node_list)):
                 node_2 = node_list[j]
                 if not self.same_cluster(node_1, node_2) and node_1.getLiteral() == node_2.getLiteral():
-                    self.G.add_edge(node_1, node_2)
+                    if not node_1.getLiteral() is None and not node_2.getLiteral is None:
+                        self.G.add_edge(node_1, node_2)
 
     def dir_x_to_not_x(self):
         node_list = list(self.G.nodes)
@@ -265,7 +272,8 @@ class SATGraph:
             for j in range(len(node_list)):
                 node_2 = node_list[j]
                 if not self.same_cluster(node_1, node_2) and node_1.getLiteral() == -node_2.getLiteral():
-                    self.G.add_edge(node_1, node_2)
+                    if not node_1.getLiteral() is None and not node_2.getLiteral is None:
+                        self.G.add_edge(node_1, node_2)
 
     def dir_x_to_all_but_x(self):
         node_list = list(self.G.nodes)
@@ -274,7 +282,8 @@ class SATGraph:
             for j in range(len(node_list)):
                 node_2 = node_list[j]
                 if not self.same_cluster(node_1, node_2) and node_1.getLiteral() != node_2.getLiteral():
-                    self.G.add_edge(node_1, node_2)
+                    if not node_1.getLiteral() is None and not node_2.getLiteral is None:
+                        self.G.add_edge(node_1, node_2)
 
     def dir_x_to_all_but_not_x(self):
         node_list = list(self.G.nodes)
@@ -283,7 +292,8 @@ class SATGraph:
             for j in range(len(node_list)):
                 node_2 = node_list[j]
                 if not self.same_cluster(node_1, node_2) and node_1.getLiteral() != -node_2.getLiteral():
-                    self.G.add_edge(node_1, node_2)
+                    if not node_1.getLiteral() is None and not node_2.getLiteral is None:
+                        self.G.add_edge(node_1, node_2)
 
     ''' Plotting Methods '''
 
