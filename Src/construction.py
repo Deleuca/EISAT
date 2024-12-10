@@ -6,8 +6,6 @@ from matplotlib import pyplot as plt
 from pysat.formula import CNF
 import random
 
-from pyvis.network import Network
-
 from node import Node
 import re
 
