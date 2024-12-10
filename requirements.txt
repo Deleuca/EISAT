@@ -1,0 +1,6 @@
+python-sat
+pyqt5
+networkx
+pyqtdarktheme
+pyqtwebengine
+matplotlib
