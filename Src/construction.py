@@ -7,6 +7,7 @@ from pysat.formula import CNF
 import random
 
 from node import Node
+from gadget import Gadget
 import re
 
 
@@ -19,6 +20,7 @@ class SATGraph:
             "K literals": 0,
             "K literals and negs": 0,
             "K Variables": 0,
+            "Num gadgets": -2
         }
         if cnf is None:
             self.cnf = CNF()
