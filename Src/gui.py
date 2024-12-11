@@ -259,11 +259,23 @@ class GraphViewer(QWidget):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.webview.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
+        # Create the toggle button
+        self.toggle_button = QPushButton("Switch to Static View")
+        self.toggle_button.setStyleSheet(
+            "background-color: #444; color: white; border-radius: 5px; padding: 5px;"
+        )
+        self.toggle_button.clicked.connect(self.toggle_view)
+
+        # Layout setup
         layout = QVBoxLayout()
         layout.addWidget(self.webview)
-        layout.setContentsMargins(0,0,0,0)
-        layout.setSpacing(0)
+        layout.addWidget(self.toggle_button)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(5)
         self.setLayout(layout)
+
+        # State variable to track the current view
+        self.is_dynamic_view = True
 
         QTimer.singleShot(1000, self.load_webview)
 
@@ -288,6 +300,21 @@ class GraphViewer(QWidget):
             self.webview.setUrl(QUrl(server_url))
         else:
             QMessageBox.critical(self, "Error", "Failed to load Graph Viewer. Server not started.")
+
+    def toggle_view(self):
+        if self.server_port:
+            # Toggle between the two views
+            if self.is_dynamic_view:
+                server_url = f"http://localhost:{self.server_port}/static-vis.html"
+                self.toggle_button.setText("Switch to Dynamic View")
+            else:
+                server_url = f"http://localhost:{self.server_port}/vis.html"
+                self.toggle_button.setText("Switch to Static View")
+
+            self.webview.setUrl(QUrl(server_url))
+            self.is_dynamic_view = not self.is_dynamic_view
+        else:
+            QMessageBox.critical(self, "Error", "Failed to toggle views. Server not started.")
 
     def reload_webview(self):
         self.webview.reload()
