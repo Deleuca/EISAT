@@ -74,11 +74,18 @@ class SATGraph:
             id = node.getName()
             info = id.split(".")
             clause = int(info[0]) - 1
+            iteration = int(info[2]) - 1
+            if info[-1] == "k":
+                group = 2 ** clause * 3 ** iteration * 5
+            elif info[-1] == "c":
+                group = 2 ** clause * 3 ** iteration * 7
+            else:
+                group = -2
             if info[-1] in ["v", "p", "n", "l"]:
                 literal = info[1]
             else:
                 literal = cnf.clauses[clause][int(info[1]) - 1]
-            nodes.append({"id": id, "group": clause, "literal": literal})
+            nodes.append({"id": id, "group": group, "literal": literal})
         links = [{"source": u.getName(), "target": v.getName(), "value": 1} for u, v in g.edges()]
         graph_data = {"nodes": nodes, "links": links}
         with open("../Data/graph.json", "w") as f:
