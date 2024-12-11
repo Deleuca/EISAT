@@ -3,6 +3,11 @@ d3.json("graph.json").then(function (data) {
     const width = container.clientWidth;
     const height = container.clientHeight;
 
+    data.nodes.forEach(node => {
+        node.x = Math.random() * width;
+        node.y = Math.random() * height;
+    });
+
     const color = d3.scaleOrdinal([
         "#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a",
         "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7", "#f2a2e8",
@@ -17,33 +22,42 @@ d3.json("graph.json").then(function (data) {
 
     function edgeKey(a, b) { return a < b ? [a, b] : [b, a]; }
 
-    const attractionStrength = 0.05; // Attraction strength between nodes of the same group
-    const repulsionStrength = 0.1;  // Repulsion strength between nodes of different groups
+    const attractionStrength = 0.5; // Attraction strength between nodes of the same group
+    const repulsionStrength = 0.5;  // Repulsion strength between nodes of different groups
 
-    const clusterForce = alpha => {
-        for (const node of data.nodes) {
-            // Apply attractive force for nodes in the same group
-            for (const otherNode of data.nodes) {
+    const clusterForce = () => {
+        data.nodes.forEach(node => {
+            node.vx = node.vx || 0;
+            node.vy = node.vy || 0;
+
+            data.nodes.forEach(otherNode => {
                 if (node !== otherNode) {
                     const dx = node.x - otherNode.x;
                     const dy = node.y - otherNode.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    const force = (node.group === otherNode.group)
-                        ? -attractionStrength * alpha / Math.max(distance, 1)  // Attraction
-                        : repulsionStrength * alpha / Math.max(distance, 1);  // Repulsion
+                    const distance = Math.sqrt(dx * dx + dy * dy) || 1; // Avoid division by zero
 
-                    node.vx -= force * dx;
-                    node.vy -= force * dy;
+                    if (node.group === otherNode.group) {
+                        // Attraction for same group
+                        const force = attractionStrength / Math.pow(distance, 2);
+                        node.vx -= force * dx / distance;
+                        node.vy -= force * dy / distance;
+                    } else {
+                        // Repulsion for different groups
+                        const force = repulsionStrength / Math.pow(distance, 2);
+                        node.vx += force * dx / distance;
+                        node.vy += force * dy / distance;
+                    }
                 }
-            }
-        }
+            });
+        });
     };
+
 
     const simulation = d3.forceSimulation(data.nodes)
         .force("link", d3.forceLink(data.links).id(d => d.id).distance(200))
         .force("charge", d3.forceManyBody().strength(-30))
         .force("center", d3.forceCenter(width / 2, height / 2))
-        .force("cluster", alpha => clusterForce(alpha))
+        .force("cluster", alpha => clusterForce())
         .on("tick", ticked);
 
     const svg = d3.create("svg")
@@ -119,7 +133,12 @@ d3.json("graph.json").then(function (data) {
             .attr("y2", d => d.target.y);
 
         nodeGroup
-            .attr("transform", d => `translate(${d.x},${d.y})`);
+            .attr("transform", d => {
+                // Constrain node positions within bounds
+                d.x = Math.max(18, Math.min(width - 18, d.x)); // Ensure nodes stay within the width
+                d.y = Math.max(18, Math.min(height - 18, d.y)); // Ensure nodes stay within the height
+                return `translate(${d.x},${d.y})`;
+            });
     }
 
     function handleMiddleClick(event, d) {
@@ -200,6 +219,7 @@ d3.json("graph.json").then(function (data) {
                     return hoveredEdges.has(eK) ? Math.min(baseOpacity + 0.2, 1) : 0.3;
                 }
             });
+
 
         nodeGroup.select("circle")
             .attr("fill-opacity", d => {
