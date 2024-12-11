@@ -17,17 +17,34 @@ d3.json("graph.json").then(function (data) {
 
     function edgeKey(a, b) { return a < b ? [a, b] : [b, a]; }
 
-    const groupForceStrength = 0.025; // Smaller value for weaker attraction
+    const groupForceStrength = 0.025; // Attraction strength
+    const repulsionStrength = 2;   // Repulsion strength
 
     const clusterForce = alpha => {
         for (const node of data.nodes) {
             const group = node.group;
             const clusterCenter = groupCenters[group] || { x: width / 2, y: height / 2 };
-            // Move node slightly toward its cluster center, but with less strength
+
+            // Attraction force within the same group
             node.vx -= (node.x - clusterCenter.x) * groupForceStrength * alpha;
             node.vy -= (node.y - clusterCenter.y) * groupForceStrength * alpha;
+
+            // Repulsion force between different groups
+            for (const otherNode of data.nodes) {
+                if (node.id !== otherNode.id && node.group !== otherNode.group) {
+                    const dx = node.x - otherNode.x;
+                    const dy = node.y - otherNode.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    // Apply repulsion force inversely proportional to distance
+                    const repulsion = repulsionStrength / (distance + 1e-6); // Prevent division by zero
+                    node.vx += dx * repulsion * alpha;
+                    node.vy += dy * repulsion * alpha;
+                }
+            }
         }
     };
+
 
 
     const groupCenters = {
