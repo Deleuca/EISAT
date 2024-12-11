@@ -333,7 +333,7 @@ class MainWindow(QMainWindow):
 
         # Set up the window properties
         self.setWindowTitle("EISAT")
-        self.resize(1200, 800)
+        self.resize(1800, 1200)
 
     def closeEvent(self, event):
         graph_json_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'Data', 'graph.json'))
