@@ -3,6 +3,12 @@ d3.json("graph.json").then(function (data) {
     const width = container.clientWidth;
     const height = container.clientHeight;
 
+    const selectedNodes = new Set();
+    const blueEdgesSet = new Set();
+    let hoveredNodeId = null;
+
+    const edgeKey = (a, b) => a < b ? [a, b] : [b, a];
+
     const color = d3.scaleOrdinal([
         "#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffb55a",
         "#ffee65", "#beb9db", "#fdcce5", "#8bd3c7", "#f2a2e8",
@@ -110,6 +116,116 @@ d3.json("graph.json").then(function (data) {
         .text(d => (d.literal < 0 ? "¬x" : "x") + Math.abs(d.literal));
 
     nodeGroup.attr("transform", d => `translate(${d.x},${d.y})`);
+
+    // Apply hover effect on nodes and edges
+    nodeGroup.select("circle")
+        .on("mouseover", (event, d) => hoveredNode(event, d))
+        .on("mouseout", () => unhovered())
+        .on("click", (event, d) => toggleSelection(event, d))
+        .on("auxclick", (event, d) => handleMiddleClick(event, d));
+
+    // Apply hover effect on text elements
+    nodeGroup.select("text")
+        .on("mouseover", (event, d) => hoveredNode(event, d))
+        .on("mouseout", () => unhovered())
+        .on("click", (event, d) => toggleSelection(event, d))
+        .on("auxclick", (event, d) => handleMiddleClick(event, d));
+
+    function hoveredNode(event, d) {
+        hoveredNodeId = d.id;
+        updateVisuals();
+    }
+
+    function unhovered() {
+        hoveredNodeId = null;
+        updateVisuals();
+    }
+
+    function handleMiddleClick(event, d) {
+        if (event.button !== 1) return; // Check for middle-click
+        event.preventDefault();
+
+        if (!pendingMiddleNode) {
+            pendingMiddleNode = d;
+        } else {
+            if (pendingMiddleNode.id !== d.id) {
+                const eK = edgeKey(pendingMiddleNode.id, d.id).toString();
+                const edgeExists = data.links.some(l =>
+                    (l.source.id === pendingMiddleNode.id && l.target.id === d.id) ||
+                    (l.source.id === d.id && l.target.id === pendingMiddleNode.id)
+                );
+
+                if (edgeExists) {
+                    // Toggle the highlight
+                    if (blueEdgesSet.has(eK)) {
+                        blueEdgesSet.delete(eK); // Unhighlight edge
+                    } else {
+                        blueEdgesSet.add(eK); // Highlight edge
+                    }
+                    updateVisuals();
+                }
+            }
+            pendingMiddleNode = null;
+        }
+    }
+
+    function toggleSelection(event, d) {
+        if (selectedNodes.has(d.id)) {
+            selectedNodes.delete(d.id); // Unselect node
+        } else {
+            selectedNodes.add(d.id); // Select node
+        }
+        updateVisuals();
+    }
+
+    function updateVisuals() {
+        const hoveredEdges = new Set();
+        if (hoveredNodeId !== null) {
+            data.links.forEach(l => {
+                if (l.source.id === hoveredNodeId || l.target.id === hoveredNodeId) {
+                    hoveredEdges.add(edgeKey(l.source.id, l.target.id).toString());
+                }
+            });
+        }
+
+        // Update link (edge) visuals
+        link
+            .attr("stroke", l => edgeBaseColor(l))
+            .attr("stroke-opacity", l => {
+                const eK = edgeKey(l.source.id, l.target.id).toString();
+                let baseOpacity = 0.6;
+                const color = edgeBaseColor(l);
+                if (color === "#00ff00" || color === "#ff9f49") baseOpacity = 0.9;
+                else if (color === "#ff0000") baseOpacity = 0.8;
+                if (hoveredNodeId === null) {
+                    return baseOpacity;
+                } else {
+                    return hoveredEdges.has(eK) ? Math.min(baseOpacity + 0.2, 1) : 0.3;
+                }
+            });
+
+        // Update node visuals (opacity for hovered nodes)
+        nodeGroup.select("circle")
+            .attr("fill-opacity", d => {
+                if (hoveredNodeId === null) return 1.0;
+                if (d.id === hoveredNodeId || d.literal === data.nodes.find(node => node.id === hoveredNodeId).literal) return 1.0;
+                return 0.3;
+            });
+
+        nodeGroup.select("text")
+            .attr("fill-opacity", d => {
+                if (hoveredNodeId === null) return 1.0;
+                if (d.id === hoveredNodeId || d.literal === data.nodes.find(node => node.id === hoveredNodeId).literal) return 1.0;
+                return 0.3;
+            });
+    }
+
+    function edgeBaseColor(l) {
+        const eK = edgeKey(l.source.id, l.target.id).toString();
+        if (blueEdgesSet.has(eK)) return "#ff9f49"; // Highlighted edges
+        if (selectedNodes.has(l.source.id) || selectedNodes.has(l.target.id)) return "#ff0000"; // Selected edges
+        return "#999"; // Normal edges
+    }
 
     document.getElementById("chart").appendChild(svg.node());
 });
