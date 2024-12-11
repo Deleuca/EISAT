@@ -266,16 +266,26 @@ class GraphViewer(QWidget):
         )
         self.toggle_button.clicked.connect(self.toggle_view)
 
+        # Create the unintimidate button (hidden initially)
+        self.unintimidate_button = QPushButton("Unintimidate")
+        self.unintimidate_button.setStyleSheet(
+            "background-color: #555; color: white; border-radius: 5px; padding: 5px;"
+        )
+        self.unintimidate_button.clicked.connect(self.toggle_curved_view)
+        self.unintimidate_button.hide()
+
         # Layout setup
         layout = QVBoxLayout()
         layout.addWidget(self.webview)
         layout.addWidget(self.toggle_button)
+        layout.addWidget(self.unintimidate_button)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(5)
         self.setLayout(layout)
 
-        # State variable to track the current view
+        # State variables to track the current view
         self.is_dynamic_view = True
+        self.is_curved_view = False
 
         QTimer.singleShot(1000, self.load_webview)
 
@@ -303,18 +313,35 @@ class GraphViewer(QWidget):
 
     def toggle_view(self):
         if self.server_port:
-            # Toggle between the two views
             if self.is_dynamic_view:
                 server_url = f"http://localhost:{self.server_port}/static-vis.html"
                 self.toggle_button.setText("Switch to Dynamic View")
+                self.unintimidate_button.show()
+                self.is_curved_view = False
+                self.unintimidate_button.setText("Unintimidate")
             else:
                 server_url = f"http://localhost:{self.server_port}/vis.html"
                 self.toggle_button.setText("Switch to Static View")
+                self.unintimidate_button.hide()
 
             self.webview.setUrl(QUrl(server_url))
             self.is_dynamic_view = not self.is_dynamic_view
         else:
             QMessageBox.critical(self, "Error", "Failed to toggle views. Server not started.")
+
+    def toggle_curved_view(self):
+        if self.server_port:
+            if not self.is_curved_view:
+                server_url = f"http://localhost:{self.server_port}/static-vis-curved.html"
+                self.unintimidate_button.setText("Intimidate")
+            else:
+                server_url = f"http://localhost:{self.server_port}/static-vis.html"
+                self.unintimidate_button.setText("Unintimidate")
+
+            self.webview.setUrl(QUrl(server_url))
+            self.is_curved_view = not self.is_curved_view
+        else:
+            QMessageBox.critical(self, "Error", "Failed to load curved static view. Server not started.")
 
     def reload_webview(self):
         self.webview.reload()

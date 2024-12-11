@@ -4,3 +4,4 @@ networkx
 pyqtdarktheme
 pyqtwebengine
 matplotlib
+pyvis
