@@ -17,26 +17,26 @@ d3.json("graph.json").then(function (data) {
 
     function edgeKey(a, b) { return a < b ? [a, b] : [b, a]; }
 
-    const groupForceStrength = 0.025; // Smaller value for weaker attraction
+    const attractionStrength = 0.05; // Attraction strength between nodes of the same group
+    const repulsionStrength = 0.1;  // Repulsion strength between nodes of different groups
 
     const clusterForce = alpha => {
         for (const node of data.nodes) {
-            const group = node.group;
-            const clusterCenter = groupCenters[group] || { x: width / 2, y: height / 2 };
-            // Move node slightly toward its cluster center, but with less strength
-            node.vx -= (node.x - clusterCenter.x) * groupForceStrength * alpha;
-            node.vy -= (node.y - clusterCenter.y) * groupForceStrength * alpha;
+            // Apply attractive force for nodes in the same group
+            for (const otherNode of data.nodes) {
+                if (node !== otherNode) {
+                    const dx = node.x - otherNode.x;
+                    const dy = node.y - otherNode.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const force = (node.group === otherNode.group)
+                        ? -attractionStrength * alpha / Math.max(distance, 1)  // Attraction
+                        : repulsionStrength * alpha / Math.max(distance, 1);  // Repulsion
+
+                    node.vx -= force * dx;
+                    node.vy -= force * dy;
+                }
+            }
         }
-    };
-
-
-    const groupCenters = {
-        0: { x: width * 0.2, y: height * 0.3 },
-        1: { x: width * 0.3, y: height * 0.5 },
-        2: { x: width * 0.7, y: height * 0.3 },
-        3: { x: width * 0.5, y: height * 0.7 },
-        4: { x: width * 0.8, y: height * 0.5 },
-        "-2": { x: width * 0.5, y: height * 0.9 },
     };
 
     const simulation = d3.forceSimulation(data.nodes)
@@ -222,153 +222,54 @@ d3.json("graph.json").then(function (data) {
 
     function isEdgeInAnyMST(eKey) {
         for (const nodeId in mstEdgesByNodeId) {
-            if (mstEdgesByNodeId[nodeId].has(eKey)) {
-                return true;
-            }
+            if (mstEdgesByNodeId[nodeId].has(eKey)) return true;
         }
         return false;
     }
 
     function toggleSelection(event, d) {
-        if (selectedNodes.has(d.id)) {
-            selectedNodes.delete(d.id);
+        if (event.ctrlKey || event.shiftKey) {
+            // CTRL or SHIFT clicked: multiple selection
+            if (selectedNodes.has(d.id)) {
+                selectedNodes.delete(d.id);
+            } else {
+                selectedNodes.add(d.id);
+            }
         } else {
+            // Normal click: clear selection
+            selectedNodes.clear();
             selectedNodes.add(d.id);
         }
         updateVisuals();
     }
 
-    function dragstarted(event) {
-        if (!event.active) simulation.alphaTarget(0.3).restart();
-        event.subject.fx = event.subject.x;
-        event.subject.fy = event.subject.y;
-    }
+    function runMSTToggle(event, d) {
+        if (event.button !== 2) return; // Right click
 
-    function dragged(event) {
-        event.subject.fx = event.x;
-        event.subject.fy = event.y;
-    }
-
-    function dragended(event) {
-        if (!event.active) simulation.alphaTarget(0);
-        event.subject.fx = null;
-        event.subject.fy = null;
-    }
-
-    async function runMSTToggle(event, d) {
-        event.preventDefault();
-
+        // Toggle MST visibility for this node
         if (mstEdgesByNodeId[d.id]) {
             delete mstEdgesByNodeId[d.id];
-            updateVisuals();
         } else {
-            const {componentNodes, componentEdges} = getConnectedComponent(d.id, data);
-            const mstEdges = computeMST(componentNodes, componentEdges);
             mstEdgesByNodeId[d.id] = new Set();
-
-            for (let i = 0; i < mstEdges.length; i++) {
-                const e = mstEdges[i];
-                const eK = edgeKey(e.source.id, e.target.id).toString();
-                mstEdgesByNodeId[d.id].add(eK);
-                updateVisuals();
-                await new Promise(resolve => setTimeout(resolve, 300));
-            }
         }
+
+        updateVisuals();
     }
 
-    function getConnectedComponent(startId, data) {
-        const adj = {};
-        data.nodes.forEach(n => { adj[n.id] = []; });
-        data.links.forEach(l => {
-            adj[l.source.id].push(l.target.id);
-            adj[l.target.id].push(l.source.id);
-        });
-
-        const visited = new Set();
-        const queue = [startId];
-        visited.add(startId);
-
-        while (queue.length > 0) {
-            const curr = queue.shift();
-            for (const neigh of adj[curr]) {
-                if (!visited.has(neigh)) {
-                    visited.add(neigh);
-                    queue.push(neigh);
-                }
-            }
-        }
-
-        const componentNodes = data.nodes.filter(n => visited.has(n.id));
-        const componentNodeIds = new Set(componentNodes.map(n => n.id));
-        const componentEdges = data.links.filter(l => componentNodeIds.has(l.source.id) && componentNodeIds.has(l.target.id));
-
-        return {componentNodes, componentEdges};
+    function dragstarted(event, d) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        d.fx = d.x;
+        d.fy = d.y;
     }
 
-    function computeMST(nodes, links) {
-        const sortedLinks = [...links].sort((a, b) => a.value - b.value);
-        const uf = new UnionFind(nodes.map(n => n.id));
-
-        const mst = [];
-        for (const edge of sortedLinks) {
-            if (uf.union(edge.source.id, edge.target.id)) {
-                mst.push(edge);
-            }
-        }
-        return mst;
+    function dragged(event, d) {
+        d.fx = event.x;
+        d.fy = event.y;
     }
 
-    class UnionFind {
-        constructor(elements) {
-            this.parent = {};
-            this.rank = {};
-            for (const e of elements) {
-                this.parent[e] = e;
-                this.rank[e] = 0;
-            }
-        }
-
-        find(x) {
-            if (this.parent[x] !== x) {
-                this.parent[x] = this.find(this.parent[x]);
-            }
-            return this.parent[x];
-        }
-
-        union(a, b) {
-            const rootA = this.find(a);
-            const rootB = this.find(b);
-
-            if (rootA === rootB) return false;
-            if (this.rank[rootA] < this.rank[rootB]) {
-                this.parent[rootA] = rootB;
-            } else if (this.rank[rootB] < this.rank[rootA]) {
-                this.parent[rootB] = rootA;
-            } else {
-                this.parent[rootB] = rootA;
-                this.rank[rootA] += 1;
-            }
-            return true;
-        }
+    function dragended(event, d) {
+        if (!event.active) simulation.alphaTarget(0);
+        d.fx = null;
+        d.fy = null;
     }
-
-}).catch(function (error) {
-    console.error("Error loading the data: ", error);
-});
-
-window.addEventListener('resize', function() {
-  const container = document.getElementById("chart");
-  const newWidth = container.clientWidth;
-  const newHeight = container.clientHeight;
-
-  svg
-    .attr("width", newWidth)
-    .attr("height", newHeight)
-    .attr("viewBox", [0, 0, newWidth, newHeight]);
-
-  // Update the force center if you're using one:
-  simulation.force("center", d3.forceCenter(newWidth / 2, newHeight / 2));
-
-  // If you want to smoothly reapply forces:
-  simulation.alpha(0.3).restart();
 });
