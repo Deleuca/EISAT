@@ -170,9 +170,13 @@ d3.json("graph.json").then(function (data) {
     }
 
     function updateVisuals() {
-        // Identify edges connected to hovered node
         const hoveredEdges = new Set();
+        let hoveredLiteral = null;
+
         if (hoveredNodeId !== null) {
+            const hoveredNode = data.nodes.find(n => n.id === hoveredNodeId);
+            hoveredLiteral = hoveredNode ? hoveredNode.literal : null;
+
             data.links.forEach(l => {
                 if (l.source.id === hoveredNodeId || l.target.id === hoveredNodeId) {
                     hoveredEdges.add(edgeKey(l.source.id, l.target.id).toString());
@@ -183,7 +187,6 @@ d3.json("graph.json").then(function (data) {
         link
             .attr("stroke", l => edgeBaseColor(l))
             .attr("stroke-opacity", l => {
-                // Base opacity depending on type
                 const eK = edgeKey(l.source.id, l.target.id).toString();
                 let baseOpacity = 0.6;
                 const c = edgeBaseColor(l);
@@ -200,13 +203,19 @@ d3.json("graph.json").then(function (data) {
         nodeGroup.select("circle")
             .attr("fill-opacity", d => {
                 if (hoveredNodeId === null) return 1.0;
-                return (d.id === hoveredNodeId) ? 1.0 : 0.3;
+                if (d.id === hoveredNodeId || (hoveredLiteral !== null && d.literal === hoveredLiteral)) {
+                    return 1.0;
+                }
+                return 0.3;
             });
 
         nodeGroup.select("text")
             .attr("fill-opacity", d => {
                 if (hoveredNodeId === null) return 1.0;
-                return (d.id === hoveredNodeId) ? 1.0 : 0.3;
+                if (d.id === hoveredNodeId || (hoveredLiteral !== null && d.literal === hoveredLiteral)) {
+                    return 1.0;
+                }
+                return 0.3;
             });
     }
 
