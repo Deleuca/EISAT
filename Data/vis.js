@@ -136,7 +136,11 @@ d3.json("graph.json").then(function (data) {
             .attr("y2", d => d.target.y);
 
         nodeGroup
-            .attr("transform", d => `translate(${d.x},${d.y})`);
+            .attr("transform", d => {
+                d.x = Math.max(18, Math.min(width - 18, d.x));  // 18 is the radius of the circle
+                d.y = Math.max(18, Math.min(height - 18, d.y));
+                return `translate(${d.x},${d.y})`;
+            });
     }
 
     function handleMiddleClick(event, d) {
